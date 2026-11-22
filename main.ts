@@ -1,11 +1,24 @@
-// A working news-image-daily entry (Node 22, standard library only): its image is the entry.png beside this file, and
-// the program copies it to /output/entry.png. A starting point, not a winner: replace the image. The gate takes a
-// whole PNG or JPEG of at most 1 MiB and 1024 by 1024 pixels, and the judge sees exactly the bytes copied.
+// News-image entry for the 22 November 2026 front page (Node 22, stdlib only).
 //
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+// The page itself is pre-rendered by tools/generate_image.py into entry.png
+// (a deterministic Pillow drawing of the day's world news). All this program
+// does is deliver that exact PNG to the grader's output directory, byte for
+// byte — it draws nothing and fetches nothing.
+//
+// Run locally:
+//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts   # -> out/entry.png
 
-import { copyFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { copyFileSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-copyFileSync(new URL('./entry.png', import.meta.url), join(process.env.MAKEFUN_OUTPUT_DIR ?? '/output', 'entry.png'));
+// The PNG sitting next to this file is the entry.
+const here = dirname(fileURLToPath(import.meta.url));
+const source = join(here, 'entry.png');
+
+// The grader sets MAKEFUN_OUTPUT_DIR; outside its container it defaults
+// to /output, matching the usual convention.
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+
+mkdirSync(outDir, { recursive: true });
+copyFileSync(source, join(outDir, 'entry.png'));
